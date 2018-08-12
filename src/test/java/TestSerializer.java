@@ -1,5 +1,6 @@
 import com.bl.cardgame.*;
 import com.bl.cardgame.cards.Card1;
+import com.bl.cardgame.cards.PlaceHolderCard;
 import com.bl.serialization.Serializer;
 import org.junit.Test;
 
@@ -11,6 +12,12 @@ import java.util.List;
 import static com.bl.cardgame.CardGameUtil.ComparatorUtil.*;
 import static org.junit.Assert.assertTrue;
 public class TestSerializer {
+    @Test
+    public void testPlaceHolderCard() throws Exception {
+        PlaceHolderCard card = new PlaceHolderCard();
+        PlaceHolderCard card2 = (PlaceHolderCard)Serializer.jsonToCard(Serializer.cardToJson(card));
+        assertTrue(isCardTheSame(card, card2));
+    }
     @Test
     public void testJsonPlayCardActionSerialize() throws Exception {
         CardAction.TYPE type = CardAction.TYPE.NON_EFFECT;

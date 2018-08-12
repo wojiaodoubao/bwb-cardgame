@@ -18,44 +18,48 @@ public class CardGameSimpleServer implements Runnable {
         Scanner sc = new Scanner(System.in);
         String command;
         while (!game.isGameOver()) {
-            System.out.println("请输入命令:");
-            command = sc.nextLine();
-            Result res = processCommand(command);
-            CardAction action = res.getCaction();
-            if (action instanceof ShowAction) {
-                String[] cmd = ((ShowAction) action).getCommand();
-                if (cmd.length > 0) {
-                    if (cmd[0].equals("basic")) {
-                        System.out.println(game.to_string_basic());
-                    } else if (cmd[0].equals("player")) {
-                        if (cmd.length==2) {
-                            System.out.println(game.to_string_player(Integer.parseInt(cmd[1])));
-                        } else {
-                            System.out.println(game.to_string_all_player());
-                        }
-                    } else if (cmd[0].equals("handcard")) {
-                        System.out.println(game.to_string_hand_cards());
-                    } else if (cmd[0].equals("cardlist")) {
-                        System.out.println(game.to_string_card_list());
-                    } else if (cmd[0].equals("actionlist")) {
-                        System.out.println(game.to_string_act_queue());
-                    } else if (cmd[0].equals("all")) {
-                        System.out.println(game.getGame(null));
-                    }
-                }
-                continue;
-            }
             try {
-                game.doAction(action);
-            } catch (Action.UnknownActionException e) {
-                System.out.println("Error:"+e.getMessage());
-            } catch (CardGame.GameException e) {
-                System.out.println("Error:"+e.getMessage());
-            } catch (Card.SanityException e) {
-                System.out.println("Error:"+e.getMessage());
-            }
+                System.out.println("请输入命令:");
+                command = sc.nextLine();
+                Result res = processCommand(command);
+                CardAction action = res.getCaction();
+                if (action instanceof ShowAction) {
+                    String[] cmd = ((ShowAction) action).getCommand();
+                    if (cmd.length > 0) {
+                        if (cmd[0].equals("basic")) {
+                            System.out.println(game.to_string_basic());
+                        } else if (cmd[0].equals("player")) {
+                            if (cmd.length == 2) {
+                                System.out.println(game.to_string_player(Integer.parseInt(cmd[1])));
+                            } else {
+                                System.out.println(game.to_string_all_player());
+                            }
+                        } else if (cmd[0].equals("handcard")) {
+                            System.out.println(game.to_string_hand_cards());
+                        } else if (cmd[0].equals("cardlist")) {
+                            System.out.println(game.to_string_card_list());
+                        } else if (cmd[0].equals("actionlist")) {
+                            System.out.println(game.to_string_act_queue());
+                        } else if (cmd[0].equals("all")) {
+                            System.out.println(game.getGame(null));
+                        }
+                    }
+                    continue;
+                }
+                try {
+                    game.doAction(action);
+                } catch (Action.UnknownActionException e) {
+                    System.out.println("Error:" + e.getMessage());
+                } catch (CardGame.GameException e) {
+                    System.out.println("Error:" + e.getMessage());
+                } catch (Card.SanityException e) {
+                    System.out.println("Error:" + e.getMessage());
+                }
 //            outputGame(game.getGame(res.getCplayer()));
 //            System.out.println(game.getGame(null));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
         sc.close();
     }

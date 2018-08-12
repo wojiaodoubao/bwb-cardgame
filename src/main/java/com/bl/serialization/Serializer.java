@@ -5,6 +5,7 @@ import com.bl.Game;
 import com.bl.Player;
 import com.bl.cardgame.*;
 import com.bl.cardgame.cards.Card1;
+import com.bl.cardgame.cards.PlaceHolderCard;
 import com.bl.rpc.Packet;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
@@ -24,11 +25,14 @@ public class Serializer {
     public static final String SKILL_ACTION = "SkillAction";
     public static final String EXCHANGE_CARD_ACTION = "ExchangeCardAction";
     public static final String Get_Game_Exception = "GetGameException";
+    private static final PlaceHolderCard placeHolderCard = new PlaceHolderCard();
     public static String cardToJson(Card card) throws JSONException {
         JSONObject jsonObj = new JSONObject();
         jsonObj.put("point", card.getPoint());
         if (card instanceof Card1) {
             jsonObj.put("type", "Card1");
+        } else if (card instanceof PlaceHolderCard) {
+            jsonObj.put("type", "PlaceHolder");
         }
         return jsonObj.toString();
     }
@@ -37,6 +41,8 @@ public class Serializer {
         int point = jsonObj.getInt("point");
         if (jsonObj.get("type").equals("Card1")) {
             return new Card1(point);
+        } else if (jsonObj.get("type").equals("PlaceHolder")) {
+            return placeHolderCard;
         } else {
             throw new RuntimeException("Bad card type!");
         }

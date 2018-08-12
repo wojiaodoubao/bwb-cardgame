@@ -3,6 +3,7 @@ package com.bl.cardgame;
 import com.bl.Action;
 import com.bl.Game;
 import com.bl.Player;
+import com.bl.cardgame.cards.PlaceHolderCard;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -30,6 +31,8 @@ public class CardGame extends Game {
     private boolean gameOver;
     int aliveNum;
     int curPlayerIndex;
+    public static boolean ReturnCompleteCardGame = false;// for debug only
+    private static final Card placeHolderCard = new PlaceHolderCard();
     //先写着，以后抽牌要是代码太冗余了再抽象一个CardGroup来专门负责洗牌和抓下一张牌等，到时候ShuffleCards可以放在CardGroup里
     public CardGame(List<CardPlayer> playerList,List<Card> cardList) throws IllegalArgumentException{
         if (playerList==null||cardList==null) {
@@ -153,11 +156,46 @@ public class CardGame extends Game {
         return getGame(player);
     }
     @Override
-    public synchronized CardGame getGame(Player player) {
-        if (player == null) {
+    public synchronized CardGame getGame(Player player) throws GameException {
+        if (ReturnCompleteCardGame) {
             return this;
+        }
+        else if (player == null || player.getId() < 0 || player.getId() >= playerList.size()) {
+            throw new GameException("Bad player Index!");
         } else {
-            return null;
+            CardGame ret = new CardGame();
+            ret.setCurPlayerIndex(this.getCurPlayerIndex());
+            ret.setAliveNum(this.getAliveNum());
+            ret.setPhase(this.phase);
+            ret.setGameOver(this.gameOver);
+            ret.setActQueue(this.actQueue);
+            ret.setDiscardCardList(this.discardCardList);
+            LinkedList<Card> pcardList = new LinkedList<Card>();
+            for (int i=0;i<cardList.size();i++) {
+                pcardList.add(placeHolderCard);
+            }
+            ret.setCardList(pcardList);
+            List<CardPlayer> pplayerList = new ArrayList<CardPlayer>();
+            for (int i=0;i<playerList.size();i++) {
+                CardPlayer pl = playerList.get(i);
+                if (pl.getId() == player.getId()) {
+                    pplayerList.add(pl);
+                } else {
+                    CardPlayer p = new CardPlayer();
+                    p.setAlive(pl.isAlive());
+                    p.setId(pl.getId());
+                    p.setName(pl.getName());
+                    p.setFeatures(pl.getFeatures());
+                    List<Card> handC = new ArrayList<Card>();
+                    for (int j = 0; j < pl.handCard.size(); j++) {
+                        handC.add(placeHolderCard);
+                    }
+                    p.setHandCards(handC);
+                    pplayerList.add(p);
+                }
+            }
+            ret.setPlayerList(pplayerList);
+            return ret;
         }
     }
 
