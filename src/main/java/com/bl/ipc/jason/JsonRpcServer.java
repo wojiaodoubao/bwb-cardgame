@@ -1,5 +1,6 @@
 package com.bl.ipc.jason;
 
+import com.bl.cardgame.CardGame;
 import com.bl.ipc.CanaryProtoImpl;
 import com.bl.ipc.proto.CanaryProtocol;
 import com.bl.ipc.Server;
@@ -25,8 +26,8 @@ public class JsonRpcServer extends Server {
 
   public final static HashMap<Class, Invoker> map = new HashMap<>();
   static {
-    CanaryProtoServerSideInvoker
-        canaryProtoInvoker = new CanaryProtoServerSideInvoker(new CanaryProtoImpl());
+    JsonServerSideInvoker
+        canaryProtoInvoker = new JsonServerSideInvoker(new CanaryProtoImpl());
     map.put(CanaryProtocol.class, canaryProtoInvoker);
   }
 

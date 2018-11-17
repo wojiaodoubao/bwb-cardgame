@@ -2,9 +2,14 @@ package com.bl.cardgame.cards;
 
 import com.bl.cardgame.*;
 import com.bl.cardgame.CardAction.TYPE;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
+
+import java.io.IOException;
 
 // exchange card, then you can't use gambling skill this round.
 public class Card1 extends Card {
+    public Card1() {}
     public Card1(int point) {
         super(point);
     }

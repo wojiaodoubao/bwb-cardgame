@@ -4,7 +4,11 @@ import com.bl.Action;
 import com.bl.Game;
 import com.bl.Player;
 import com.bl.cardgame.cards.PlaceHolderCard;
+import com.bl.ipc.jason.JsonWritable;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -14,7 +18,8 @@ import java.util.List;
  * 再比如说，怎么防止两个client同时声称是同一个client？
  * 这个都慢慢以后再处理吧
  * */
-public class CardGame extends Game {
+public class CardGame extends Game implements JsonWritable {
+
     public static class GameException extends Exception {
         public GameException(String msg) {
             super(msg);
@@ -102,7 +107,7 @@ public class CardGame extends Game {
         return playerList.get(curPlayerIndex);
     }
     @Override
-    public synchronized Game doAction(Action action) throws Action.UnknownActionException, GameException, Card.SanityException {
+    public synchronized CardGame doAction(Action action) throws Action.UnknownActionException, GameException, Card.SanityException {
         assert action instanceof CardAction;
         CardAction cAction = (CardAction) action;
         Player player = getPlayer(cAction.getSrcPlayer());
@@ -375,5 +380,30 @@ public class CardGame extends Game {
             sb.append("Action["+i+"]"+actQueue.get(i).type+" "+actQueue.get(i).getClass()+"\n");
         }
         return sb.toString();
+    }
+
+    @Override
+    public JSONObject toJson() throws IOException, JSONException {
+        return null;
+    }
+
+    @Override
+    public void fromJson(JSONObject jobj)
+        throws IOException, JSONException {
+
+    }
+
+    @Override
+    public Action foo(Action action)
+        throws Action.UnknownActionException, GameException,
+        Card.SanityException, IOException {
+        return action;
+    }
+
+    @Override
+    public Player foo(Player player)
+        throws Action.UnknownActionException, GameException,
+        Card.SanityException, IOException {
+        return player;
     }
 }

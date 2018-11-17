@@ -1,8 +1,8 @@
 package com.bl.ipc;
 
-import com.bl.ipc.jason.CanaryProtoServerSideInvoker;
 import com.bl.ipc.jason.JsonRpcClient;
 import com.bl.ipc.jason.JsonRpcServer;
+import com.bl.ipc.jason.JsonServerSideInvoker;
 import com.bl.ipc.proto.CanaryProtocol;
 import org.apache.log4j.BasicConfigurator;
 import org.codehaus.jettison.json.JSONObject;
@@ -44,7 +44,7 @@ public class TestIpc {
         }
       };
       JsonRpcServer.map.put(CanaryProtocol.class,
-          new CanaryProtoServerSideInvoker(timeoutImpl));
+          new JsonServerSideInvoker(timeoutImpl));
       server.start();
 
       CanaryProtocol canaryProtocol = (CanaryProtocol) JsonRpcClient
@@ -142,7 +142,7 @@ public class TestIpc {
       CanaryProtocol canaryProtocol = (CanaryProtocol) JsonRpcClient
           .createProtocolImpl(CanaryProtocol.class, address, 3000);
       for (int i = 0; i < 10; i++) {
-        canaryProtocol.isAlive();
+        canaryProtocol.echo("abc");
       }
     } finally {
       if (server != null) {

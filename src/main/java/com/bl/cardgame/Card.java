@@ -1,12 +1,15 @@
 package com.bl.cardgame;
 
-import com.bl.Action;
-import com.bl.Player;
+import com.bl.ipc.jason.JsonWrapper;
+import com.bl.ipc.jason.JsonWritable;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Random;
 
-public abstract class Card {
+public abstract class Card implements JsonWritable {
     protected int point;
     public static class SanityException extends Exception {
         public SanityException(String msg) {
@@ -27,6 +30,8 @@ public abstract class Card {
             }
         }
     }
+
+    public Card() {}
 
     public Card(int point) {
         this.point = point;
@@ -49,6 +54,18 @@ public abstract class Card {
 
     public int getPoint() {
         return point;
+    }
+
+    @Override
+    public JSONObject toJson() throws IOException, JSONException {
+        JSONObject jobj = new JSONObject();
+        JsonWrapper.objectToJson(this.getClass(), this, jobj);
+        return jobj;
+    }
+
+    @Override
+    public void fromJson(JSONObject jobj) throws IOException, JSONException {
+        JsonWrapper.jsonToObject(this.getClass(), this, jobj);
     }
 
     // card operate

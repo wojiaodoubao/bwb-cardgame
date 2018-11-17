@@ -3,7 +3,12 @@ package com.bl.cardgame;
 import com.bl.Action;
 import com.bl.Player;
 import com.bl.cardgame.cards.Card1;
+import com.bl.ipc.jason.JsonWrapper;
+import org.codehaus.jettison.json.JSONArray;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -80,11 +85,33 @@ public class CardGameSimpleServer implements Runnable {
     }
     private class ShowAction extends CardAction {
         String[] command;
+
+        public ShowAction() {}
+
         public ShowAction(String[] command) {
             this.command = command;
         }
+
         public String[] getCommand() {
             return command;
+        }
+
+        @Override
+        public JSONObject toJson() throws IOException, JSONException {
+            JSONObject jobj = super.toJson();
+            jobj.put("command", command);
+            return jobj;
+        }
+
+        @Override
+        public void fromJson(JSONObject jobj) throws IOException, JSONException {
+            super.fromJson(jobj);
+            JSONArray array = jobj.getJSONArray("command");
+            String[] command = new String[array.length()];
+            for (int i=0;i<array.length();i++) {
+                command[i] = array.getString(i);
+            }
+            this.command = command;
         }
     }
     private Result processCommand(String command) {

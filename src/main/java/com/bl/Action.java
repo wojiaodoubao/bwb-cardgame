@@ -1,7 +1,8 @@
 package com.bl;
 
-public class Action {
-    static public class UnknownActionException extends Exception {
+import com.bl.ipc.jason.JsonWritable;
 
+public abstract class Action implements JsonWritable {
+    static public class UnknownActionException extends Exception {
     }
 }

@@ -1,16 +1,19 @@
 package com.bl.cardgame;
 
 import com.bl.Player;
+import com.bl.ipc.jason.JsonWrapper;
+import org.codehaus.jettison.json.JSONArray;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class CardPlayer extends Player {
     List<Card> handCard = new ArrayList<Card>();
     List<Feature> features = new ArrayList<Feature>();
-    public CardPlayer() {
-        super();
-    }
+    public CardPlayer() {}
     public CardPlayer(int id, String name) {
         super(id, name);
     }
@@ -90,5 +93,27 @@ public class CardPlayer extends Player {
     public CardPlayer setFeatures(List<Feature> features) {
         this.features = features;
         return this;
+    }
+
+    @Override
+    public JSONObject toJson() throws IOException, JSONException {
+        JSONObject jobj = super.toJson();
+        JSONArray array = JsonWrapper.collectionToJsonArray(handCard, new JSONArray());
+        jobj.put(CardPlayer.class.getName() + "handCard", array);
+        array = JsonWrapper.collectionToJsonArray(features, new JSONArray());
+        jobj.put(CardPlayer.class.getName() + "features", array);
+        return jobj;
+    }
+
+    @Override
+    public void fromJson(JSONObject jobj) throws IOException, JSONException {
+        super.fromJson(jobj);
+        JSONArray array = jobj.getJSONArray(CardPlayer.class.getName() + "handCard");
+        handCard =
+            (List<Card>) JsonWrapper.jsonArrayToCollection(array, new ArrayList<Card>());
+        array = jobj.getJSONArray(CardPlayer.class.getName() + "features");
+        features =
+            (List<Feature>) JsonWrapper.jsonArrayToCollection(array, new ArrayList<Feature>());
+
     }
 }

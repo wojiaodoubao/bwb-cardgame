@@ -50,6 +50,7 @@ public abstract class Server {
           }
         } catch (InterruptedException e) {
         } catch (Exception e) {
+          LOG.warn("got exception", e);
         }
       }
     }

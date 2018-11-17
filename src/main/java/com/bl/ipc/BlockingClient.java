@@ -1,6 +1,7 @@
 package com.bl.ipc;
 
-import com.bl.ipc.jason.CanaryProtoClientSideInvoker;
+import com.bl.ClientGameProtocol;
+import com.bl.ipc.jason.JsonClientSideInvoker;
 import com.bl.ipc.proto.CanaryProtocol;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -33,7 +34,8 @@ public class BlockingClient { // BlockingIO BlockingClient / long term connectio
 
   public final static HashMap<Class, Invoker> map = new HashMap<>();
   static { // register Se/De Invoker to protocol
-    map.put(CanaryProtocol.class, new CanaryProtoClientSideInvoker());
+    map.put(CanaryProtocol.class, new JsonClientSideInvoker());
+    map.put(ClientGameProtocol.class, new JsonClientSideInvoker());
   }
 
   public static BlockingClient getClient(InetSocketAddress address) throws IOException {
