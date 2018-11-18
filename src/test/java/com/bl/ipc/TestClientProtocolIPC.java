@@ -1,6 +1,6 @@
 package com.bl.ipc;
 
-import com.bl.ClientGameProtocol;
+import com.bl.ipc.proto.ClientGameProtocol;
 import com.bl.cardgame.*;
 import com.bl.ipc.jason.JsonRpcClient;
 import com.bl.ipc.jason.JsonRpcServer;

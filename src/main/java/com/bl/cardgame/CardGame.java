@@ -36,7 +36,7 @@ public class CardGame extends Game implements JsonWritable {
     private boolean gameOver;
     int aliveNum;
     int curPlayerIndex;
-    public static boolean ReturnCompleteCardGame = false;// for debug only
+    public static boolean ReturnWholeCardGame = false;// for debug only
     private static final Card placeHolderCard = new PlaceHolderCard();
     //先写着，以后抽牌要是代码太冗余了再抽象一个CardGroup来专门负责洗牌和抓下一张牌等，到时候ShuffleCards可以放在CardGroup里
     public CardGame(List<CardPlayer> playerList,List<Card> cardList) throws IllegalArgumentException{
@@ -106,67 +106,15 @@ public class CardGame extends Game implements JsonWritable {
     public CardPlayer currentPlayer() {
         return playerList.get(curPlayerIndex);
     }
-    @Override
-    public synchronized CardGame doAction(Action action) throws Action.UnknownActionException, GameException, Card.SanityException {
-        assert action instanceof CardAction;
-        CardAction cAction = (CardAction) action;
-        Player player = getPlayer(cAction.getSrcPlayer());
-        if (!currentPlayer().equals(player)) {
-            throw new GameException("Not your turn!");
-        }
-        if (cAction instanceof DrawCardAction) {
-            if (phase != PHASE.DRAW_PHASE && phase != PHASE.START_PHASE) {
-                throw new GameException("Wrong Phase");
-            }
-            Card card = nextCardWithShuffle();
-            card.draw(this,curPlayerIndex);// trigger draw effect
-            currentPlayer().addCard(card);
-            enterPhase(PHASE.PLAY_PHASE);
-        } else if (cAction instanceof SkillAction) {
-            if (phase != PHASE.END_PHASE) {
-                throw new GameException("Wrong Phase, Expect EndPhase");
-            }
-            if (cAction.getType() == CardAction.TYPE.EFFECT) {
-                if (currentPlayer().getFeature(DisableSkillFeature.class) != null) {
-                    throw new GameException("Skill is disabled in this phase");
-                }
-                SkillAction saction = (SkillAction) cAction;
-                assert saction.getCard() != null;
-                Card card = saction.getCard();
-                card.sanityCheck(saction, this);
-                card.play(saction, this);
-            }
-            currentPlayer().removeFeature(DisableSkillFeature.class);
-            enterPhase(PHASE.START_PHASE);
-        } else if (cAction instanceof PlayCardAction) {
-            if (phase != PHASE.PLAY_PHASE) {
-                throw new GameException("Wrong Phase");
-            }
-            PlayCardAction paction = (PlayCardAction) cAction;
-            if (currentPlayer().getCard(paction.getCardIndex()) != null) {
-                Card card = currentPlayer().getCard(paction.getCardIndex());
-                card.sanityCheck(paction, this);
-                card.play(paction, this);
-                card.discard(paction, this);
-            }
-            enterPhase(PHASE.END_PHASE);
-        } else if (cAction instanceof GetCardGameAction) {
-            ;
-        } else {
-            throw new Action.UnknownActionException();
-        }
-        if (cAction.shoudRecord()) {
-            actQueue.add(cAction);
-        }
-        return getGame(player);
-    }
+
     @Override
     public synchronized CardGame getGame(Player player) throws GameException {
-        if (ReturnCompleteCardGame) {
-            return this;
-        }
-        else if (player == null || player.getId() < 0 || player.getId() >= playerList.size()) {
-            throw new GameException("Bad player Index!");
+        if (player == null || player.getId() < 0 || player.getId() >= playerList.size()) {
+            if (ReturnWholeCardGame) {
+                return this;
+            } else {
+                throw new GameException("Bad player Index!");
+            }
         } else {
             CardGame ret = new CardGame();
             ret.setCurPlayerIndex(this.getCurPlayerIndex());
@@ -201,6 +149,76 @@ public class CardGame extends Game implements JsonWritable {
             }
             ret.setPlayerList(pplayerList);
             return ret;
+        }
+    }
+
+    @Override
+    public Game playCard(PlayCardAction action)
+        throws Action.UnknownActionException, GameException,
+        Card.SanityException, IOException {
+        checkTurn(action);
+        if (phase != PHASE.PLAY_PHASE) {
+            throw new GameException("Wrong Phase");
+        }
+        if (currentPlayer().getCard(action.getCardIndex()) != null) {
+            Card card = currentPlayer().getCard(action.getCardIndex());
+            card.sanityCheck(action, this);
+            card.play(action, this);
+            card.discard(action, this);
+        }
+        enterPhase(PHASE.END_PHASE);
+        recordAction(action);
+        return getGame(currentPlayer());
+    }
+
+    @Override
+    public Game drawCard(DrawCardAction action)
+        throws Action.UnknownActionException, GameException,
+        Card.SanityException, IOException {
+        checkTurn(action);
+        if (phase != PHASE.DRAW_PHASE && phase != PHASE.START_PHASE) {
+            throw new GameException("Wrong Phase");
+        }
+        Card card = nextCardWithShuffle();
+        card.draw(this,curPlayerIndex);// trigger draw effect
+        currentPlayer().addCard(card);
+        enterPhase(PHASE.PLAY_PHASE);
+        recordAction(action);
+        return getGame(currentPlayer());
+    }
+
+    @Override public Game skill(SkillAction action)
+        throws Action.UnknownActionException, GameException,
+        Card.SanityException, IOException {
+        checkTurn(action);
+        if (phase != PHASE.END_PHASE) {
+            throw new GameException("Wrong Phase, Expect EndPhase");
+        }
+        if (action.getType() == CardAction.TYPE.EFFECT) {
+            if (currentPlayer().getFeature(DisableSkillFeature.class) != null) {
+                throw new GameException("Skill is disabled in this phase");
+            }
+            assert action.getCard() != null;
+            Card card = action.getCard();
+            card.sanityCheck(action, this);
+            card.play(action, this);
+        }
+        currentPlayer().removeFeature(DisableSkillFeature.class);
+        enterPhase(PHASE.START_PHASE);
+        recordAction(action);
+        return getGame(currentPlayer());
+    }
+
+    private void checkTurn(CardAction action) throws GameException {
+        Player player = getPlayer(action.getSrcPlayer());
+        if (!currentPlayer().equals(player)) {
+            throw new GameException("Not your turn!");
+        }
+    }
+
+    private void recordAction(CardAction action) {
+        if (action.shoudRecord()) {
+            actQueue.add(action);
         }
     }
 

@@ -1,6 +1,6 @@
 package com.bl.ipc;
 
-import com.bl.ClientGameProtocol;
+import com.bl.ipc.proto.ClientGameProtocol;
 import com.bl.ipc.jason.JsonClientSideInvoker;
 import com.bl.ipc.proto.CanaryProtocol;
 import org.apache.commons.logging.Log;
