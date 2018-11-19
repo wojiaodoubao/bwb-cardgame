@@ -58,4 +58,20 @@ public class CardAction extends Action {
         this.timestamp = jobj.getLong("timestamp");
         this.srcPlayerIndex = jobj.getInt("srcPlayerIndex");
     }
+
+    @Override
+    public int hashCode() {
+        return type.hashCode() + (int)timestamp + srcPlayerIndex;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj  == this) return true;
+        if (obj instanceof CardAction) {
+            CardAction cA = (CardAction) obj;
+            return cA.type == type && cA.timestamp == timestamp
+                && cA.srcPlayerIndex == srcPlayerIndex;
+        }
+        return false;
+    }
 }

@@ -33,9 +33,7 @@ public class CardGameUtil {
                     if (act1.playerIndex != act2.playerIndex) return false;
                     if (!act1.msg.equals(act2.msg)) return false;
                 } else if (action1 instanceof DrawCardAction) {
-                    DrawCardAction act1 = (DrawCardAction) action1;
-                    DrawCardAction act2 = (DrawCardAction) action2;
-                    if (act1.source != act2.source) return false;
+                    ;
                 } else if (action1 instanceof SkillAction) {
                     ;
                 } else if (action1 instanceof PlayCardAction) {

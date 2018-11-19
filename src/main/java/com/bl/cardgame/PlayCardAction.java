@@ -5,6 +5,7 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 public class PlayCardAction extends CardAction {
     int cardIndex;
@@ -50,5 +51,23 @@ public class PlayCardAction extends CardAction {
         for (int i=0;i<array.length();i++) {
             targets[i] = array.getInt(i);
         }
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode() + cardIndex + source
+            + (targets == null?0:targets.length);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj instanceof PlayCardAction) {
+            PlayCardAction pca = (PlayCardAction) obj;
+
+            return super.equals(pca) && pca.cardIndex == cardIndex
+                && pca.source == source && Arrays.equals(pca.targets, targets);
+        }
+        return false;
     }
 }

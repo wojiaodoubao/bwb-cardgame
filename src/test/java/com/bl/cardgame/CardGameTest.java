@@ -28,8 +28,7 @@ public class CardGameTest implements Runnable {
               String[] items = command.split(" ");
               int playerId = Integer.parseInt(items[0]);
               if (items[1].equals("draw")) {
-                int source = Integer.parseInt(items[2]);
-                game.drawCard(new DrawCardAction(playerId, source));
+                game.drawCard(new DrawCardAction(playerId));
               } else if (items[1].equals("play")) {
                 int cardIndex = Integer.parseInt(items[2]);
                 int source = Integer.parseInt(items[3]);

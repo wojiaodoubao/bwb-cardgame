@@ -17,9 +17,9 @@ public class SkillCardGamblingPoints extends Card {
         // both src and dst should have only one card in hand.
         Card srcCard = srcPlayer.getCard(0);
         Card dstCard = dstPlayer.getCard(0);
-        if (srcCard.getPoint() > dstCard.getPoint()) {
+        if (srcCard.getPoint() < dstCard.getPoint()) {
             game.killPlayer(srcPlayer);
-        } else if (srcCard.getPoint() < dstCard.getPoint()) {
+        } else if (srcCard.getPoint() > dstCard.getPoint()) {
             game.killPlayer(dstPlayer);
         } else {
 

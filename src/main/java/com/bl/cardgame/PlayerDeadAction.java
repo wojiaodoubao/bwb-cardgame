@@ -5,6 +5,7 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 public class PlayerDeadAction extends CardAction {
     int playerIndex;
@@ -37,5 +38,22 @@ public class PlayerDeadAction extends CardAction {
     public void fromJson(JSONObject jobj) throws IOException, JSONException {
         super.fromJson(jobj);
         JsonWrapper.jsonToObject(this.getClass(), this, jobj);
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode() + playerIndex + (msg == null?0:msg.length());
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj instanceof PlayerDeadAction) {
+            PlayerDeadAction pda = (PlayerDeadAction) obj;
+
+            return super.equals(pda) && pda.msg.equals(msg)
+                && pda.playerIndex == playerIndex;
+        }
+        return false;
     }
 }

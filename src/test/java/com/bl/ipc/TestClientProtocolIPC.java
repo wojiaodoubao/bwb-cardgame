@@ -36,7 +36,7 @@ public class TestClientProtocolIPC {
 
       PlayerDeadAction playerDeadAction = new PlayerDeadAction(1, "1");
       clientProtocol.foo(playerDeadAction);
-      DrawCardAction drawCardAction = new DrawCardAction(0, 0);
+      DrawCardAction drawCardAction = new DrawCardAction(0);
       clientProtocol.foo(drawCardAction);
       ShuffleCardAction shuffleCardAction = new ShuffleCardAction();
       clientProtocol.foo(shuffleCardAction);

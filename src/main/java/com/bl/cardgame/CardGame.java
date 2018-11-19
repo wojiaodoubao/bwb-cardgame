@@ -153,13 +153,14 @@ public class CardGame extends Game implements JsonWritable {
     }
 
     @Override
-    public Game playCard(PlayCardAction action)
+    public CardGame playCard(PlayCardAction action)
         throws Action.UnknownActionException, GameException,
         Card.SanityException, IOException {
         checkTurn(action);
         if (phase != PHASE.PLAY_PHASE) {
             throw new GameException("Wrong Phase");
         }
+        recordAction(action);
         if (currentPlayer().getCard(action.getCardIndex()) != null) {
             Card card = currentPlayer().getCard(action.getCardIndex());
             card.sanityCheck(action, this);
@@ -167,33 +168,33 @@ public class CardGame extends Game implements JsonWritable {
             card.discard(action, this);
         }
         enterPhase(PHASE.END_PHASE);
-        recordAction(action);
         return getGame(currentPlayer());
     }
 
     @Override
-    public Game drawCard(DrawCardAction action)
+    public CardGame drawCard(DrawCardAction action)
         throws Action.UnknownActionException, GameException,
         Card.SanityException, IOException {
         checkTurn(action);
         if (phase != PHASE.DRAW_PHASE && phase != PHASE.START_PHASE) {
             throw new GameException("Wrong Phase");
         }
+        recordAction(action);
         Card card = nextCardWithShuffle();
         card.draw(this,curPlayerIndex);// trigger draw effect
         currentPlayer().addCard(card);
         enterPhase(PHASE.PLAY_PHASE);
-        recordAction(action);
         return getGame(currentPlayer());
     }
 
-    @Override public Game skill(SkillAction action)
+    @Override public CardGame skill(SkillAction action)
         throws Action.UnknownActionException, GameException,
         Card.SanityException, IOException {
         checkTurn(action);
         if (phase != PHASE.END_PHASE) {
             throw new GameException("Wrong Phase, Expect EndPhase");
         }
+        recordAction(action);
         if (action.getType() == CardAction.TYPE.EFFECT) {
             if (currentPlayer().getFeature(DisableSkillFeature.class) != null) {
                 throw new GameException("Skill is disabled in this phase");
@@ -205,7 +206,6 @@ public class CardGame extends Game implements JsonWritable {
         }
         currentPlayer().removeFeature(DisableSkillFeature.class);
         enterPhase(PHASE.START_PHASE);
-        recordAction(action);
         return getGame(currentPlayer());
     }
 

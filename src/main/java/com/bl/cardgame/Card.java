@@ -57,6 +57,21 @@ public abstract class Card implements JsonWritable {
     }
 
     @Override
+    public int hashCode() {
+        return point;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj instanceof Card) {
+            Card card = (Card) obj;
+            return card.point == point;
+        }
+        return false;
+    }
+
+    @Override
     public JSONObject toJson() throws IOException, JSONException {
         JSONObject jobj = new JSONObject();
         JsonWrapper.objectToJson(this.getClass(), this, jobj);
