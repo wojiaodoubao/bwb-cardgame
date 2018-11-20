@@ -31,17 +31,15 @@ public class CardGameTest implements Runnable {
                 game.drawCard(new DrawCardAction(playerId));
               } else if (items[1].equals("play")) {
                 int cardIndex = Integer.parseInt(items[2]);
-                int source = Integer.parseInt(items[3]);
-                int[] target = new int[1];
-                target[0] = Integer.parseInt(items[4]);
-                CardAction.TYPE type = items[5].equals("effect") ? CardAction.TYPE.EFFECT : CardAction.TYPE.NON_EFFECT;
-                game.playCard(new PlayCardAction(type, playerId, cardIndex, source, target));
-              } else if (items[1].equals("skill")) {
-                int source = Integer.parseInt(items[2]);
                 int[] target = new int[1];
                 target[0] = Integer.parseInt(items[3]);
                 CardAction.TYPE type = items[4].equals("effect") ? CardAction.TYPE.EFFECT : CardAction.TYPE.NON_EFFECT;
-                game.skill(new SkillAction(type, playerId, source, target));
+                game.playCard(new PlayCardAction(type, playerId, cardIndex, target));
+              } else if (items[1].equals("skill")) {
+                int[] target = new int[1];
+                target[0] = Integer.parseInt(items[2]);
+                CardAction.TYPE type = items[3].equals("effect") ? CardAction.TYPE.EFFECT : CardAction.TYPE.NON_EFFECT;
+                game.skill(new SkillAction(type, playerId, target));
               } else if (items[1].equals("show")) {
                 if (items.length > 1) {
                   if (items[2].equals("basic")) {

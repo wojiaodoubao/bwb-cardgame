@@ -18,14 +18,15 @@ public class Card1 extends Card {
         if (pa.getType() == TYPE.NON_EFFECT) {
             return;
         } else {
-            CardPlayer srcPlayer = game.getPlayer(pa.getSource());
+            CardPlayer srcPlayer = game.getPlayer(pa.getSrcPlayer());
             CardPlayer dstPlayer = game.getPlayer(pa.getTargets()[0]);
             Card srcCard = srcPlayer.removeCard(1-pa.getCardIndex());
             Card dstCard = dstPlayer.removeCard(0);
             srcPlayer.insertCard(1-pa.getCardIndex(), dstCard);
             dstPlayer.addCard(srcCard);
             srcPlayer.addFeature(new DisableSkillFeature());
-            game.addAction(new ExchangeCardAction(pa.getSource(), pa.getTargets()[0]));
+            game.addAction(new ExchangeCardAction(pa.getSrcPlayer(),
+                pa.getTargets()[0]));
         }
     }
 }

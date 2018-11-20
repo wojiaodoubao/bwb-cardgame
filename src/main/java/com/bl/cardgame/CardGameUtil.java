@@ -40,7 +40,6 @@ public class CardGameUtil {
                     PlayCardAction act1 = (PlayCardAction) action1;
                     PlayCardAction act2 = (PlayCardAction) action2;
                     if (act1.cardIndex != act2.cardIndex) return false;
-                    if (act1.source != act2.source) return false;
                     if (act1.targets.length != act2.targets.length) return false;
                     for (int i=0;i<act1.targets.length;i++) {
                         if (act1.targets[i] != act2.targets[i]) return false;

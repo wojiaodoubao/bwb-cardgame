@@ -7,8 +7,8 @@ public class SkillAction extends PlayCardAction {
 
     public SkillAction() {}
 
-    public SkillAction(TYPE type, int srcPlayerIndex, int source, int[] targets) {
-        super(type, srcPlayerIndex, -1, source, targets);
+    public SkillAction(TYPE type, int srcPlayerIndex, int[] targets) {
+        super(type, srcPlayerIndex, -1, targets);
     }
 
     public Card getCard() {

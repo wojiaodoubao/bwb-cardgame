@@ -12,7 +12,7 @@ public class SkillCardGamblingPoints extends Card {
         // just do it
         assert pa.getType() == CardAction.TYPE.EFFECT;
         // player shouldn't be null
-        CardPlayer srcPlayer = game.getPlayer(pa.getSource());
+        CardPlayer srcPlayer = game.getPlayer(pa.getSrcPlayer());
         CardPlayer dstPlayer = game.getPlayer(pa.getTargets()[0]);
         // both src and dst should have only one card in hand.
         Card srcCard = srcPlayer.getCard(0);

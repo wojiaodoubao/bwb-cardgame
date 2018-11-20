@@ -34,7 +34,7 @@ public class TestCardGame {
     }
     CardGame cgame = new CardGame(playerList, cards);
     try {
-      cgame.playCard(new PlayCardAction(CardAction.TYPE.NON_EFFECT, 0, 0, 0, new int[]{0}));
+      cgame.playCard(new PlayCardAction(CardAction.TYPE.NON_EFFECT, 0, 0, new int[]{0}));
       assertTrue("Shouldn't get here!", false);
     } catch (CardGame.GameException e) {
       assertTrue(e.getMessage().contains("Wrong Phase"));
@@ -75,7 +75,7 @@ public class TestCardGame {
     cardGame.drawCard(new DrawCardAction(0));
     Card card = cardGame.getPlayer(0).handCard.get(1);
     assertTrue(cardGame.getPlayer(0).handCard.size() == 2);
-    cardGame.playCard(new PlayCardAction(CardAction.TYPE.NON_EFFECT, 0, 0, 0, new int[]{}));
+    cardGame.playCard(new PlayCardAction(CardAction.TYPE.NON_EFFECT, 0, 0, new int[]{}));
     assertTrue(cardGame.getPlayer(0).handCard.size() == 1);
     assertTrue(cardGame.getPlayer(0).handCard.get(0).equals(card));
   }
@@ -94,7 +94,7 @@ public class TestCardGame {
     cardGame.drawCard(new DrawCardAction(0));
     Card sCard = cardGame.getPlayer(0).handCard.get(1);
     Card dCard = cardGame.getPlayer(1).handCard.get(0);
-    cardGame.playCard(new PlayCardAction(CardAction.TYPE.EFFECT, 0, 0, 0, new int[]{1}));
+    cardGame.playCard(new PlayCardAction(CardAction.TYPE.EFFECT, 0, 0, new int[]{1}));
     assertTrue(cardGame.getPlayer(0).handCard.get(0).equals(dCard));
     assertTrue(cardGame.getPlayer(1).handCard.get(0).equals(sCard));
   }
@@ -114,9 +114,9 @@ public class TestCardGame {
     cardGame.drawCard(dca);
     Card sCard = cardGame.getPlayer(0).handCard.get(1);
     Card dCard = cardGame.getPlayer(1).handCard.get(0);
-    PlayCardAction pca = new PlayCardAction(CardAction.TYPE.NON_EFFECT, 0, 0, 0, new int[]{});
+    PlayCardAction pca = new PlayCardAction(CardAction.TYPE.NON_EFFECT, 0, 0, new int[]{});
     cardGame.playCard(pca);
-    SkillAction sa = new SkillAction(CardAction.TYPE.EFFECT, 0, 0, new int[] {1});
+    SkillAction sa = new SkillAction(CardAction.TYPE.EFFECT, 0, new int[] {1});
     cardGame.skill(sa);
     if (sCard.point < dCard.point) {
       assertTrue(!cardGame.getPlayer(0).isAlive());

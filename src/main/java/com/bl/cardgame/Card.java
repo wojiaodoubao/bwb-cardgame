@@ -47,7 +47,7 @@ public abstract class Card implements JsonWritable {
     }
     // discard effect
     public void discard(PlayCardAction action,CardGame game) throws CardGame.GameException {
-        CardPlayer player = game.getPlayer(action.getSource());
+        CardPlayer player = game.getPlayer(action.getSrcPlayer());
         player.removeCard(action.cardIndex);
         game.addToDiscardCard(this);
     }

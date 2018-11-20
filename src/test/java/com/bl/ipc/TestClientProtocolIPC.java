@@ -40,7 +40,7 @@ public class TestClientProtocolIPC {
       clientProtocol.foo(drawCardAction);
       ShuffleCardAction shuffleCardAction = new ShuffleCardAction();
       clientProtocol.foo(shuffleCardAction);
-      PlayCardAction playCardAction = new PlayCardAction(CardAction.TYPE.EFFECT, 1, 1, 2, new int[] {0, 1});
+      PlayCardAction playCardAction = new PlayCardAction(CardAction.TYPE.EFFECT, 1, 1, new int[] {0, 1});
       clientProtocol.foo(playCardAction);
       SkillAction skillAction = new SkillAction();
       clientProtocol.foo(skillAction);
