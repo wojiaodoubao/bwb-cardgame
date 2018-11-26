@@ -89,7 +89,7 @@ public class JsonWrapper { // TODO:JsonWrapper看起来就是之前Serializer的
   public static JSONArray collectionToJsonArray(Collection collection, JSONArray array)
       throws IOException, JSONException {
     Iterator iterator = collection.iterator();
-    if (iterator.hasNext()) {
+    while (iterator.hasNext()) {
       Object obj = iterator.next();
       if (JsonWritable.class.isAssignableFrom(obj.getClass())) {
         array.put(toJson((JsonWritable)obj));

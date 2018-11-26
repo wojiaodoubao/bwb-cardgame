@@ -10,6 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
 
 public class TestClientProtocolIPC {
   InetSocketAddress address = new InetSocketAddress("localhost", 9080);
@@ -24,7 +25,7 @@ public class TestClientProtocolIPC {
     JsonRpcServer server = null;
     try {
       // register test game to ipc server and start server.
-      CardGame testGame = TestCardGame.getCardGame();
+      CardGame testGame = CardGame.getCardGame();
       JsonServerSideInvoker
           clientGameProtoInvoker = new JsonServerSideInvoker(testGame);
       JsonRpcServer.map.put(ClientGameProtocol.class, clientGameProtoInvoker);
@@ -40,7 +41,10 @@ public class TestClientProtocolIPC {
       clientProtocol.foo(drawCardAction);
       ShuffleCardAction shuffleCardAction = new ShuffleCardAction();
       clientProtocol.foo(shuffleCardAction);
-      PlayCardAction playCardAction = new PlayCardAction(CardAction.TYPE.EFFECT, 1, 1, new int[] {0, 1});
+      ArrayList targets = new ArrayList<>();
+      targets.add(0);
+      targets.add(1);
+      PlayCardAction playCardAction = new PlayCardAction(CardAction.TYPE.EFFECT, 1, 1, targets);
       clientProtocol.foo(playCardAction);
       SkillAction skillAction = new SkillAction();
       clientProtocol.foo(skillAction);

@@ -31,13 +31,13 @@ public class CardGameTest implements Runnable {
                 game.drawCard(new DrawCardAction(playerId));
               } else if (items[1].equals("play")) {
                 int cardIndex = Integer.parseInt(items[2]);
-                int[] target = new int[1];
-                target[0] = Integer.parseInt(items[3]);
+                ArrayList<Integer> target = new ArrayList<>();
+                target.add(Integer.parseInt(items[3]));
                 CardAction.TYPE type = items[4].equals("effect") ? CardAction.TYPE.EFFECT : CardAction.TYPE.NON_EFFECT;
                 game.playCard(new PlayCardAction(type, playerId, cardIndex, target));
               } else if (items[1].equals("skill")) {
-                int[] target = new int[1];
-                target[0] = Integer.parseInt(items[2]);
+                ArrayList<Integer> target = new ArrayList<>();
+                target.add(Integer.parseInt(items[2]));
                 CardAction.TYPE type = items[3].equals("effect") ? CardAction.TYPE.EFFECT : CardAction.TYPE.NON_EFFECT;
                 game.skill(new SkillAction(type, playerId, target));
               } else if (items[1].equals("show")) {

@@ -3,12 +3,20 @@ package com.bl.cardgame;
 import com.bl.Action;
 import com.bl.Game;
 import com.bl.Player;
+import com.bl.cardgame.cards.Card1;
 import com.bl.cardgame.cards.PlaceHolderCard;
+import com.bl.ipc.jason.JsonRpcServer;
+import com.bl.ipc.jason.JsonServerSideInvoker;
+import com.bl.ipc.jason.JsonWrapper;
 import com.bl.ipc.jason.JsonWritable;
+import com.bl.ipc.proto.ClientGameProtocol;
+import org.apache.log4j.BasicConfigurator;
+import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -360,17 +368,23 @@ public class CardGame extends Game implements JsonWritable {
     public String to_string_hand_cards() {
         StringBuilder sb = new StringBuilder();
         for (int i=0;i<playerList.size();i++) {
-            sb.append("Player["+i+"]:\n");
+            sb.append("Player["+i+"]:");
             List<Card> cards = playerList.get(i).handCard;
             for (int j=0;j<cards.size();j++) {
-                sb.append(cards.get(j).getPoint() +" "+cards.get(j).getClass()+"\n");
+                sb.append(j+"-["+cards.get(j).getPoint() +" "+cards.get(j).getClass().getName()+"] ");
             }
+            sb.append("\n");
         }
         return sb.toString();
     }
 
     public String to_string_player(int index) {
-        return "Player["+index+"]"+playerList.get(index);
+        CardPlayer p = playerList.get(index);
+        String featureStr = " ";
+        for (Feature f : p.features) {
+            featureStr += f.getClass().getName()+" ";
+        }
+        return String.format("Player[%d]:%d %s %s <%s>", index, p.getId(), p.getName(), p.isAlive(), featureStr);
     }
 
     public String to_string_all_player() {
@@ -395,20 +409,60 @@ public class CardGame extends Game implements JsonWritable {
     public String to_string_act_queue() {
         StringBuilder sb = new StringBuilder();
         for (int i=0;i<actQueue.size();i++) {
-            sb.append("Action["+i+"]"+actQueue.get(i).type+" "+actQueue.get(i).getClass()+"\n");
+            sb.append("Action["+i+"]"+actQueue.get(i).srcPlayerIndex +" "+ actQueue.get(i).type+" "+actQueue.get(i).getClass()+"\n");
         }
         return sb.toString();
     }
 
     @Override
     public JSONObject toJson() throws IOException, JSONException {
-        return null;
+        JSONObject jobj = new JSONObject();
+        jobj.put("phase", phase);
+        jobj.put("gameOver", gameOver);
+        jobj.put("aliveNum", aliveNum);
+        jobj.put("curPlayerIndex", curPlayerIndex);
+        JSONArray array = JsonWrapper.collectionToJsonArray(playerList, new JSONArray());
+        jobj.put("playerList", array);
+        array = JsonWrapper.collectionToJsonArray(cardList, new JSONArray());
+        jobj.put("cardList", array);
+        array = JsonWrapper.collectionToJsonArray(discardCardList, new JSONArray());
+        jobj.put("discardCardList", array);
+        array = JsonWrapper.collectionToJsonArray(actQueue, new JSONArray());
+        jobj.put("actQueue", array);
+        return jobj;
     }
 
     @Override
     public void fromJson(JSONObject jobj)
         throws IOException, JSONException {
-
+        this.phase = PHASE.valueOf(jobj.getString("phase"));
+        this.gameOver = jobj.getBoolean("gameOver");
+        this.aliveNum = jobj.getInt("aliveNum");
+        this.curPlayerIndex = jobj.getInt("curPlayerIndex");
+        playerList = new ArrayList<>();
+        JSONArray array = jobj.getJSONArray("playerList");
+        for (int i=0;i<array.length();i++) {
+            JSONObject jo = array.getJSONObject(i);
+            playerList.add((CardPlayer) JsonWrapper.fromJson(jo));
+        }
+        cardList = new LinkedList<>();
+        array = jobj.getJSONArray("cardList");
+        for (int i=0;i<array.length();i++) {
+            JSONObject jo = array.getJSONObject(i);
+            cardList.add((Card) JsonWrapper.fromJson(jo));
+        }
+        discardCardList = new LinkedList<>();
+        array = jobj.getJSONArray("discardCardList");
+        for (int i=0;i<array.length();i++) {
+            JSONObject jo = array.getJSONObject(i);
+            discardCardList.add((Card) JsonWrapper.fromJson(jo));
+        }
+        actQueue = new ArrayList<>();
+        array = jobj.getJSONArray("actQueue");
+        for (int i=0;i<array.length();i++) {
+            JSONObject jo = array.getJSONObject(i);
+            actQueue.add((CardAction) JsonWrapper.fromJson(jo));
+        }
     }
 
     @Override
@@ -423,5 +477,28 @@ public class CardGame extends Game implements JsonWritable {
         throws Action.UnknownActionException, GameException,
         Card.SanityException, IOException {
         return player;
+    }
+
+    // for test
+    public static CardGame getCardGame() {
+        List<CardPlayer> playerList = new ArrayList<CardPlayer>();
+        List<Card> cards = new ArrayList<Card>();
+        for (int i=0;i<10;i++) {
+            cards.add(new Card1(i));
+        }
+        for (int j=0;j<3;j++) {
+            playerList.add(new CardPlayer(j, "p"+j));
+        }
+        CardGame cgame = new CardGame(playerList, cards);
+        return cgame;
+    }
+
+    public static InetSocketAddress address = new InetSocketAddress("localhost", 9080);
+    public static void main(String args[]) throws Exception {
+        BasicConfigurator.configure();
+        CardGame game = CardGame.getCardGame();
+        JsonRpcServer server = new JsonRpcServer(address, 1);
+        JsonRpcServer.map.put(ClientGameProtocol.class, new JsonServerSideInvoker(game));
+        server.start();
     }
 }

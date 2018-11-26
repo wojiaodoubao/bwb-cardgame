@@ -74,13 +74,13 @@ public abstract class Card implements JsonWritable {
     @Override
     public JSONObject toJson() throws IOException, JSONException {
         JSONObject jobj = new JSONObject();
-        JsonWrapper.objectToJson(this.getClass(), this, jobj);
+        jobj.put("point", point);
         return jobj;
     }
 
     @Override
     public void fromJson(JSONObject jobj) throws IOException, JSONException {
-        JsonWrapper.jsonToObject(this.getClass(), this, jobj);
+        point = jobj.getInt("point");
     }
 
     // card operate
