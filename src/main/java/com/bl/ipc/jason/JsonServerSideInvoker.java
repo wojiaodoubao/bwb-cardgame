@@ -71,6 +71,6 @@ public class JsonServerSideInvoker implements Server.Invoker {
       paramStr += param.getName() + ",";
     }
     paramStr += ")";
-    throw new Exception("couldn't find proper method " + methodName + paramStr);
+    throw new Exception("couldn't find proper method" + methodName + paramStr);
   }
 }

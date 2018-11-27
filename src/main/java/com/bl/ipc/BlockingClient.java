@@ -19,10 +19,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * BlockingClient runs in BlockingIO mode, keeps a long term connection to Server, and
  * has a daemon thread waiting for Server's responses.
+ * TODO: why does it cost cpu so much ?
  * */
 public class BlockingClient { // BlockingIO BlockingClient / long term connection
 
   public static final Log LOG = LogFactory.getLog(BlockingClient.class);
+  public static class ServerException extends IOException {
+    public ServerException(String msg) {
+      super(msg);
+    }
+  }
   static HashMap<InetSocketAddress, BlockingClient> clientMap = new HashMap<>();
 
   public static interface Invoker {// handles Se & De, must be stateless
@@ -73,6 +79,15 @@ public class BlockingClient { // BlockingIO BlockingClient / long term connectio
         while (!closed) {
           int callId = in.readInt();// DataInputStream will get an EOFException
                                     // when connection is closed
+          int errorLen = in.readInt();
+          String errorMsg = null;
+          if (errorLen > 0) {
+            byte[] content = new byte[errorLen];
+            if (in.read(content) != errorLen) { // read() returns either len or -1
+              throw new IOException("Unexpected len.");
+            }
+            errorMsg = new String(content);
+          }
           int len = in.readInt();
           byte[] content = new byte[len];
           if (in.read(content) != len) { // read() returns either len or -1
@@ -83,6 +98,7 @@ public class BlockingClient { // BlockingIO BlockingClient / long term connectio
             if (response != null) {
               response.callId = callId;
               response.response = content;
+              response.errorMsg = errorMsg;
               response.done = true;
             }
             if (response.callback != null) {
@@ -103,10 +119,11 @@ public class BlockingClient { // BlockingIO BlockingClient / long term connectio
       }
     }
   }
-  public class Response { // TODO: support the response of the Server Exception
+  public class Response {
     boolean done = false;
     int callId;
     byte[] response;
+    String errorMsg;
     ResponseCallback callback = null;
     long curTime = System.currentTimeMillis();
   }
@@ -213,6 +230,8 @@ public class BlockingClient { // BlockingIO BlockingClient / long term connectio
           } else {
             throw new IOException("Connection been closed!");
           }
+        } else if (response.errorMsg != null) {
+          throw new ServerException(response.errorMsg);
         } else {
           return response;
         }
@@ -220,11 +239,15 @@ public class BlockingClient { // BlockingIO BlockingClient / long term connectio
     }
   }
 
-  public Response getResponse(int callId) {
+  public Response getResponse(int callId) throws IOException {
     synchronized (waitResponseMap) {
       Response response = waitResponseMap.get(callId);
       if (response != null && response.done) {
-        return  response;
+        if (response.errorMsg != null) {
+          throw new ServerException(response.errorMsg);
+        } else {
+          return response;
+        }
       } else {
         return null;
       }

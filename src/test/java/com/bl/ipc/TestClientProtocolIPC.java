@@ -25,7 +25,7 @@ public class TestClientProtocolIPC {
     JsonRpcServer server = null;
     try {
       // register test game to ipc server and start server.
-      CardGame testGame = CardGame.getCardGame();
+      CardGame testGame = CardGame.getCardGame(3);
       JsonServerSideInvoker
           clientGameProtoInvoker = new JsonServerSideInvoker(testGame);
       JsonRpcServer.map.put(ClientGameProtocol.class, clientGameProtoInvoker);

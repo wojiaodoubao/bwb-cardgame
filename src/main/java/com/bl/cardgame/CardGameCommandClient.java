@@ -57,7 +57,7 @@ public class CardGameCommandClient {
         } else if (items[0].equals("discard")) {
           int cardIndex = Integer.parseInt(items[1]);
           ArrayList<Integer> target = new ArrayList<>();
-          target.add(Integer.parseInt(items[2]));
+          target.add(Integer.parseInt(items[1]));
           CardAction.TYPE type = CardAction.TYPE.NON_EFFECT;
           game = (CardGame) client.playCard(new PlayCardAction(type, playerId, cardIndex, target));
         } else if (items[0].equals("skill")) {
@@ -68,7 +68,6 @@ public class CardGameCommandClient {
               (CardGame) client.skill(new SkillAction(type, playerId, target));
         } else if (items[0].equals("skip")) {
           ArrayList<Integer> target = new ArrayList<>();
-          target.add(Integer.parseInt(items[1]));
           CardAction.TYPE type = CardAction.TYPE.NON_EFFECT;
           game =
               (CardGame) client.skill(new SkillAction(type, playerId, target));
@@ -80,7 +79,13 @@ public class CardGameCommandClient {
         LOG.warn("Error while playing", e);
       }
     }
-    System.out.println("Game over!");
+    CardPlayer winner = null;
+    for (CardPlayer cp : game.getPlayerList()) {
+      if (cp.isAlive()) {
+        winner = cp;
+      }
+    }
+    System.out.println(String.format("Game over! Winner:%d/%s", winner.getId(), winner.getName()));
   }
 
   public synchronized void showGame(boolean force) {

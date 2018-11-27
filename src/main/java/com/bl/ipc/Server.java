@@ -4,6 +4,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.*;
@@ -49,8 +50,18 @@ public abstract class Server {
             response.con.responseQueue.addLast(response);
           }
         } catch (InterruptedException e) {
-        } catch (Exception e) {
+        } catch (Throwable e) {
           LOG.warn("got exception", e);
+          Response response = new Response();
+          response.setConnection(rqe.connection);
+          response.setCallId(rqe.callId);
+          if (e instanceof InvocationTargetException) {
+            e = e.getCause();
+          }
+          response.setException(e.getMessage());
+          synchronized (response.con.responseQueue) {
+            response.con.responseQueue.addLast(response);
+          }
         }
       }
     }
@@ -129,6 +140,17 @@ public abstract class Server {
             } else if (curKey.isValid() && curKey.isWritable()) {
               Connection conn = (Connection) curKey.attachment();
               conn.handleWrite();
+            }
+          }
+          // Find all invalid SelectionKeys, and cancel them.
+          Iterator<SelectionKey> iter = readSelector.selectedKeys().iterator();
+          while (iter.hasNext()) {
+            SelectionKey key = iter.next();
+            if (!key.isValid()) {
+              Connection conn = (Connection) curKey.attachment();
+              conn.close();
+              key.cancel();
+              LOG.info("cancel key:" + key);
             }
           }
         } catch (ClosedChannelException e) {
@@ -220,8 +242,10 @@ public abstract class Server {
     class Writer {
       Connection con = null;
       ByteBuffer buffer = null;
+      ByteBuffer errorBuf = null;
       ByteBuffer dataLenBuf = ByteBuffer.allocate(4);
       ByteBuffer callIdBuf = ByteBuffer.allocate(4);
+      ByteBuffer errorLenBuf = ByteBuffer.allocate(4);
       public void handleWrite() throws IOException {
         if (buffer == null) {
           Response response = null;
@@ -232,6 +256,12 @@ public abstract class Server {
               response = responseQueue.pop();
             }
           }
+          errorBuf = ByteBuffer.allocate(response.errorMsg.getBytes().length);
+          errorBuf.put(response.errorMsg.getBytes());
+          errorBuf.flip();
+          assert errorLenBuf.remaining() == 4;
+          errorLenBuf.putInt(errorBuf.remaining());
+          errorLenBuf.flip();
           buffer = serializeResponse(response);
           assert dataLenBuf.remaining() == 4;
           dataLenBuf.putInt(buffer.remaining());
@@ -246,6 +276,24 @@ public abstract class Server {
           if (len < 0) {
             throw new ClosedChannelException();
           } else if (callIdBuf.remaining() > 0) {
+            return;
+          }
+        }
+        // send errorLenBuf
+        if (errorLenBuf.remaining() > 0) {
+          int len = channel.write(errorLenBuf);
+          if (len < 0) {
+            throw new ClosedChannelException();
+          } else if (errorLenBuf.remaining() > 0) {
+            return;
+          }
+        }
+        // send errorBuf
+        if (errorBuf.remaining() > 0) {
+          int len = channel.write(errorBuf);
+          if (len < 0) {
+            throw new ClosedChannelException();
+          } else if (errorBuf.remaining() > 0) {
             return;
           }
         }
@@ -271,8 +319,10 @@ public abstract class Server {
         buffer = null;
         con = null;
         dataLenBuf.clear();
+        errorLenBuf.clear();
         callIdBuf.clear();
         buffer = null;
+        errorBuf = null;
       }
     }
     public Connection(SocketChannel channel) throws IOException {
@@ -289,27 +339,37 @@ public abstract class Server {
     }
     public void close() {
       try {
+        reader = null;
+        writer = null;
+        responseQueue = null;
+        con = null;
         channel.close();
+        channel = null;
       } catch (IOException e) {
+        LOG.debug("error while closing Connection");
       }
     }
   }
 
-  public static abstract class Request<T> {
+  public static class Request<T> {
     protected Class protocolClass;
     public Class getProtocolClass() {
       return protocolClass;
     }
   }
 
-  public static abstract class Response<T> {
+  public static class Response<T> {
     Connection con;
     int callId;
+    String errorMsg = "";
     public void setConnection(Connection con) {
       this.con = con;
     }
     public void setCallId(int callId) {
       this.callId = callId;
+    }
+    public void setException(String msg) {
+      this.errorMsg = msg;
     }
   }
 

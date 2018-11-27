@@ -58,13 +58,13 @@ public class JsonRpcServer extends Server {
 
   @Override public ByteBuffer serializeResponse(Response response)
       throws IOException {// 返回前记得flip
+    byte[] content = null;
     if (!(response instanceof JsonResponse)) {
-      throw new IOException(
-          "JsonRpcServer expects JsonResponse, but response is " + response
-              .getClass());
+      content = new JSONObject().toString().getBytes();
+    } else {
+      JsonResponse jsonResponse = (JsonResponse) response;
+      content = jsonResponse.jobj.toString().getBytes();
     }
-    JsonResponse jsonResponse = (JsonResponse) response;
-    byte[] content = jsonResponse.jobj.toString().getBytes();
     ByteBuffer buffer = ByteBuffer.allocate(content.length);
     buffer.put(content);
     buffer.flip();

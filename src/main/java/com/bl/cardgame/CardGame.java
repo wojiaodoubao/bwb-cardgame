@@ -105,6 +105,9 @@ public class CardGame extends Game implements JsonWritable {
                 pl.setAlive(false);
                 aliveNum -- ;
                 actQueue.add(new PlayerDeadAction(i,""));
+                if (aliveNum <= 1) {
+                    gameOver = true;
+                }
                 return pl;
             }
         }
@@ -218,6 +221,9 @@ public class CardGame extends Game implements JsonWritable {
     }
 
     private void checkTurn(CardAction action) throws GameException {
+        if (gameOver) {
+            throw new GameException("Game is over!");
+        }
         Player player = getPlayer(action.getSrcPlayer());
         if (!currentPlayer().equals(player)) {
             throw new GameException("Not your turn!");
@@ -480,13 +486,13 @@ public class CardGame extends Game implements JsonWritable {
     }
 
     // for test
-    public static CardGame getCardGame() {
+    public static CardGame getCardGame(int playerNum) {
         List<CardPlayer> playerList = new ArrayList<CardPlayer>();
         List<Card> cards = new ArrayList<Card>();
         for (int i=0;i<10;i++) {
             cards.add(new Card1(i));
         }
-        for (int j=0;j<3;j++) {
+        for (int j=0;j<playerNum;j++) {
             playerList.add(new CardPlayer(j, "p"+j));
         }
         CardGame cgame = new CardGame(playerList, cards);
@@ -496,7 +502,7 @@ public class CardGame extends Game implements JsonWritable {
     public static InetSocketAddress address = new InetSocketAddress("localhost", 9080);
     public static void main(String args[]) throws Exception {
         BasicConfigurator.configure();
-        CardGame game = CardGame.getCardGame();
+        CardGame game = CardGame.getCardGame(2);
         JsonRpcServer server = new JsonRpcServer(address, 1);
         JsonRpcServer.map.put(ClientGameProtocol.class, new JsonServerSideInvoker(game));
         server.start();
